@@ -4,14 +4,26 @@ export function clamp(value: number, min: number, max: number): number {
 	return Math.min(Math.max(value, min), max);
 }
 
-export function isLivePreview(view: MarkdownView): boolean {
-	return view.getMode() === "source" && view.containerEl.classList.contains("is-live-preview");
+function getMarkdownSourceRoot(view: MarkdownView): HTMLElement | null {
+	const el = view.containerEl.querySelector(".markdown-source-view");
+	return el instanceof HTMLElement ? el : null;
 }
 
-/** Reading view or live preview — not plain source mode. */
+export function isLivePreview(view: MarkdownView): boolean {
+	if (view.getMode() !== "source") return false;
+	const source = getMarkdownSourceRoot(view);
+	if (source?.classList.contains("is-live-preview")) return true;
+	return view.containerEl.classList.contains("is-live-preview");
+}
+
+export function isPlainSourceMode(view: MarkdownView): boolean {
+	return view.getMode() === "source" && !isLivePreview(view);
+}
+
+/** Reading view, live preview, and plain source mode. */
 export function shouldShowFloatToc(view: MarkdownView): boolean {
-	if (view.getMode() === "preview") return true;
-	return isLivePreview(view);
+	const mode = view.getMode();
+	return mode === "preview" || mode === "source";
 }
 
 function isScrollableY(el: HTMLElement): boolean {

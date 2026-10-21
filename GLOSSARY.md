@@ -11,3 +11,6 @@ User-facing terms for this plugin (not implementation).
 | **TOC rail** | Collapsed TOC: a vertical stack of short lines indicating heading count and depth (Notion default view). |
 | **TOC panel** | Expanded TOC on hover: rounded overlay listing heading titles for navigation. |
 | **Pixel Banner** | Third-party Obsidian plugin (`pexels-banner`) that renders a top cover image on notes; affects vertical layout for this plugin. |
+| **Reading view** | Obsidian Markdown view mode that renders the note as a read-only preview (`preview` in the API). |
+| **Live preview** | Default editing mode: source editor with rendered blocks (headings, lists, etc.) inline. |
+| **Source mode** | Editing mode that shows raw Markdown in the editor without inline rendering. |

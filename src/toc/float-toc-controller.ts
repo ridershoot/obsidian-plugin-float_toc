@@ -7,9 +7,12 @@ import {
 } from '../settings';
 import { computeTopAlignedRailInsetPx } from './banner-offset';
 import {
+	getActiveHeadingIndexByLine,
 	getActiveHeadingIndexInPreview,
 	getPreviewScrollLine,
+	getSourceScrollSpyLine,
 	scrollPreviewToHeading,
+	scrollSourceToHeading,
 } from './preview-scroll';
 import {
 	getActiveHeadingIndex,
@@ -19,6 +22,7 @@ import {
 	getScrollElement,
 	getScrollElements,
 	isLivePreview,
+	isPlainSourceMode,
 	resolveHeadingElement,
 	resolveHeadingElements,
 	scrollToHeadingElement,
@@ -38,9 +42,12 @@ export class FloatTocController {
 	private scrollEls: HTMLElement[] = [];
 	private previewScrollRaf = 0;
 	private lastPreviewScroll = -1;
+	private sourceScrollRaf = 0;
+	private lastSourceSpyLine = -1;
 	private resizeObserver: ResizeObserver | null = null;
 	private bannerMutationObserver: MutationObserver | null = null;
 	private observedBannerEl: HTMLElement | null = null;
+	private sourceModeClassObserver: MutationObserver | null = null;
 	private layoutWarmupTimers: number[] = [];
 	/** Cached top offset for「靠顶部」; scroll must not re-measure title DOM. */
 	private stableRailTopPx: number | null = null;
@@ -82,20 +89,25 @@ export class FloatTocController {
 
 		this.bindScroll();
 		this.startPreviewScrollLoop();
+		this.startSourceScrollLoop();
 		this.setupResizeObserver();
 		this.setupBannerObserver();
+		this.setupSourceModeObserver();
 		this.refresh();
 	}
 
 	detach(): void {
 		window.cancelAnimationFrame(this.scrollRaf);
 		window.cancelAnimationFrame(this.previewScrollRaf);
+		window.cancelAnimationFrame(this.sourceScrollRaf);
 		window.clearTimeout(this.scrollTargetTimer);
 		this.resizeObserver?.disconnect();
 		this.resizeObserver = null;
 		this.bannerMutationObserver?.disconnect();
 		this.bannerMutationObserver = null;
 		this.observedBannerEl = null;
+		this.sourceModeClassObserver?.disconnect();
+		this.sourceModeClassObserver = null;
 		for (const id of this.layoutWarmupTimers) window.clearTimeout(id);
 		this.layoutWarmupTimers = [];
 		this.unbindScroll();
@@ -120,6 +132,10 @@ export class FloatTocController {
 		}
 
 		this.overlayEl.classList.remove('is-hidden');
+
+		if (!this.sourceModeClassObserver) {
+			this.setupSourceModeObserver();
+		}
 
 		const filePath = this.view.file?.path ?? null;
 		if (filePath !== this.stableRailTopFilePath) {
@@ -245,14 +261,8 @@ export class FloatTocController {
 			return;
 		}
 
-		const line = heading.position.start.line;
-		const ch = heading.position.start.col;
-		this.view.editor.setCursor({ line, ch });
-		this.view.editor.scrollIntoView(
-			{ from: { line, ch }, to: { line, ch } },
-			true,
-		);
-		window.requestAnimationFrame(() => this.updateLayout());
+		scrollSourceToHeading(this.view, heading, offset, true);
+		window.setTimeout(() => this.updateLayout(), 450);
 	}
 
 	private bindScroll(): void {
@@ -297,6 +307,29 @@ export class FloatTocController {
 		tick();
 	}
 
+	private startSourceScrollLoop(): void {
+		const tick = (): void => {
+			this.sourceScrollRaf = window.requestAnimationFrame(tick);
+			if (
+				!this.overlayEl ||
+				this.overlayEl.classList.contains('is-hidden') ||
+				!isPlainSourceMode(this.view)
+			) {
+				return;
+			}
+
+			const spyLine = getSourceScrollSpyLine(
+				this.view,
+				FIXED_SCROLL_SPY_OFFSET,
+			);
+			if (spyLine === this.lastSourceSpyLine) return;
+
+			this.lastSourceSpyLine = spyLine;
+			this.updateLayout();
+		};
+		tick();
+	}
+
 	private unbindScroll(): void {
 		for (const el of this.scrollEls) {
 			el.removeEventListener('scroll', this.onScroll);
@@ -320,6 +353,20 @@ export class FloatTocController {
 		if (viewContent instanceof HTMLElement) {
 			this.resizeObserver.observe(viewContent);
 		}
+	}
+
+	private setupSourceModeObserver(): void {
+		const source = this.view.containerEl.querySelector('.markdown-source-view');
+		if (!(source instanceof HTMLElement)) return;
+
+		this.sourceModeClassObserver = new MutationObserver(() => {
+			this.railTopDirty = true;
+			this.refresh();
+		});
+		this.sourceModeClassObserver.observe(source, {
+			attributes: true,
+			attributeFilter: ['class'],
+		});
 	}
 
 	private setupBannerObserver(): void {
@@ -400,6 +447,11 @@ export class FloatTocController {
 				getPreviewScrollLine(this.view),
 				FIXED_SCROLL_SPY_OFFSET,
 				this.view,
+			);
+		} else if (isPlainSourceMode(this.view)) {
+			activeIndex = getActiveHeadingIndexByLine(
+				this.headings,
+				getSourceScrollSpyLine(this.view, FIXED_SCROLL_SPY_OFFSET),
 			);
 		} else {
 			const scrollEl = getScrollElement(this.view);
@@ -531,6 +583,12 @@ export class FloatTocController {
 	private isScrolledPastDocumentStart(): boolean {
 		if (this.view.getMode() === 'preview') {
 			return getPreviewScrollLine(this.view) > 2;
+		}
+
+		if (isPlainSourceMode(this.view)) {
+			return (
+				getSourceScrollSpyLine(this.view, FIXED_SCROLL_SPY_OFFSET) > 2
+			);
 		}
 
 		const scrollEl = getScrollElement(this.view);
