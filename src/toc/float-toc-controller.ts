@@ -168,15 +168,26 @@ export class FloatTocController {
 				void this.jumpToHeading(index);
 			});
 
-			const item = this.panelEl!.createEl('button', {
+			const item = this.panelEl!.createDiv({
 				cls: 'float-toc-item',
 				text: heading.heading,
-				attr: { type: 'button', 'data-index': String(index) },
+				attr: {
+					role: 'button',
+					tabindex: '0',
+					'data-index': String(index),
+					'data-depth': String(depth),
+					'data-level': String(heading.level),
+				},
 			});
 			item.style.setProperty('--float-toc-depth', String(depth));
 			this.plugin.registerDomEvent(item, 'click', (evt) => {
 				evt.preventDefault();
 				evt.stopPropagation();
+				void this.jumpToHeading(index);
+			});
+			this.plugin.registerDomEvent(item, 'keydown', (evt) => {
+				if (evt.key !== 'Enter' && evt.key !== ' ') return;
+				evt.preventDefault();
 				void this.jumpToHeading(index);
 			});
 		});
