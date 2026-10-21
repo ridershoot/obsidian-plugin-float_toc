@@ -4,6 +4,7 @@ import {
 	DEFAULT_SETTINGS,
 	FloatTocSettings,
 	FloatTocSettingTab,
+	MAX_HEADING_LEVEL_LIMIT,
 } from './settings';
 
 export default class FloatTocPlugin extends Plugin {
@@ -29,10 +30,13 @@ export default class FloatTocPlugin extends Plugin {
 	}
 
 	async loadSettings() {
-		this.settings = Object.assign(
-			{},
-			DEFAULT_SETTINGS,
-			(await this.loadData()) as Partial<FloatTocSettings>,
+		const stored = (await this.loadData()) as Partial<FloatTocSettings> & {
+			minHeadingLevel?: number;
+		};
+		this.settings = Object.assign({}, DEFAULT_SETTINGS, stored);
+		this.settings.maxHeadingLevel = Math.min(
+			MAX_HEADING_LEVEL_LIMIT,
+			Math.max(1, this.settings.maxHeadingLevel),
 		);
 	}
 

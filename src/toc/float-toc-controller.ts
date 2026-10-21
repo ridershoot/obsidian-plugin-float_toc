@@ -1,5 +1,10 @@
 import { HeadingCache, MarkdownView } from 'obsidian';
 import type FloatTocPlugin from '../main';
+import {
+	FIXED_MIN_HEADING_LEVEL,
+	FIXED_RAIL_TOP,
+	FIXED_SCROLL_SPY_OFFSET,
+} from '../settings';
 import { computeTopAlignedRailInsetPx } from './banner-offset';
 import {
 	getActiveHeadingIndexInPreview,
@@ -126,7 +131,7 @@ export class FloatTocController {
 		this.headings = getHeadingsForFile(
 			this.plugin.app,
 			this.view.file,
-			this.plugin.settings.minHeadingLevel,
+			FIXED_MIN_HEADING_LEVEL,
 			this.plugin.settings.maxHeadingLevel,
 		);
 
@@ -218,7 +223,7 @@ export class FloatTocController {
 			this.headingEls[index] = el;
 		}
 
-		const offset = this.plugin.settings.scrollSpyOffset;
+		const offset = FIXED_SCROLL_SPY_OFFSET;
 
 		if (this.view.getMode() === 'preview') {
 			scrollPreviewToHeading(this.view, heading, offset, true);
@@ -393,7 +398,7 @@ export class FloatTocController {
 			activeIndex = getActiveHeadingIndexInPreview(
 				this.headings,
 				getPreviewScrollLine(this.view),
-				this.plugin.settings.scrollSpyOffset,
+				FIXED_SCROLL_SPY_OFFSET,
 				this.view,
 			);
 		} else {
@@ -412,7 +417,7 @@ export class FloatTocController {
 			activeIndex = getActiveHeadingIndex(
 				this.headingEls,
 				scrollEl,
-				this.plugin.settings.scrollSpyOffset,
+				FIXED_SCROLL_SPY_OFFSET,
 			);
 		}
 		if (this.scrollTargetIndex !== null) {
@@ -491,8 +496,7 @@ export class FloatTocController {
 					this.view,
 					hostRect,
 					this.headings,
-					this.plugin.settings.bannerOffsetExtra,
-					this.plugin.settings.railTopFixed,
+					FIXED_RAIL_TOP,
 				),
 			);
 
@@ -520,8 +524,7 @@ export class FloatTocController {
 
 		return Math.max(
 			edgePadding,
-			this.plugin.settings.railTopFixed +
-				this.plugin.settings.bannerOffsetExtra,
+			FIXED_RAIL_TOP,
 		);
 	}
 

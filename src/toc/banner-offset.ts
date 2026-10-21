@@ -126,12 +126,11 @@ export function computeTopAlignedRailInsetPx(
 	view: MarkdownView,
 	hostRect: DOMRect,
 	headings: HeadingCache[],
-	bannerOffsetExtra: number,
 	railTopFixed: number,
 ): number {
 	const inlineInset = measureInlineTitleInsetPx(view, hostRect);
 	if (inlineInset !== null) {
-		return inlineInset + bannerOffsetExtra;
+		return inlineInset;
 	}
 
 	const titleHeading = pickHeadingForTitleAlign(headings);
@@ -145,12 +144,12 @@ export function computeTopAlignedRailInsetPx(
 			firstHeading: titleHeading,
 		});
 		if (titleInset !== null) {
-			return titleInset + bannerOffsetExtra;
+			return titleInset;
 		}
 		if (bannerFloor > 0) {
-			return bannerFloor + bannerOffsetExtra;
+			return bannerFloor;
 		}
 	}
 
-	return railTopFixed + bannerOffsetExtra;
+	return railTopFixed;
 }

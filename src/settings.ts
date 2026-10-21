@@ -5,29 +5,29 @@ export type FloatTocRailVerticalAlign = 'center' | 'top';
 
 export interface FloatTocSettings {
 	enabled: boolean;
-	/** Manual tweak when Pixel Banner layout differs from measured inset. */
-	bannerOffsetExtra: number;
-	/** Pixels from top of scroll viewport used for scroll-spy active heading. */
-	scrollSpyOffset: number;
-	/** Fixed distance from top when vertical align is「顶部」. */
-	railTopFixed: number;
 	/** Distance from the right edge of the editor pane to the rail. */
 	railInsetEnd: number;
 	/** Vertical placement of the rail within the visible editor pane. */
 	railVerticalAlign: FloatTocRailVerticalAlign;
-	minHeadingLevel: number;
 	maxHeadingLevel: number;
 }
 
+/** Deepest heading level always included in the TOC (H1). */
+export const FIXED_MIN_HEADING_LEVEL = 1;
+
+export const MAX_HEADING_LEVEL_LIMIT = 3;
+
+/** Scroll-spy line offset from the top of the scroll viewport (px). */
+export const FIXED_SCROLL_SPY_OFFSET = 96;
+
+/** Top inset for the rail when vertically aligned to「顶部」(px). */
+export const FIXED_RAIL_TOP = 72;
+
 export const DEFAULT_SETTINGS: FloatTocSettings = {
 	enabled: true,
-	bannerOffsetExtra: 0,
-	scrollSpyOffset: 96,
-	railTopFixed: 72,
-	railInsetEnd: 12,
+	railInsetEnd: 16,
 	railVerticalAlign: 'top',
-	minHeadingLevel: 1,
-	maxHeadingLevel: 6,
+	maxHeadingLevel: 3,
 };
 
 export class FloatTocSettingTab extends PluginSettingTab {
@@ -50,23 +50,6 @@ export class FloatTocSettingTab extends PluginSettingTab {
 					.setValue(this.plugin.settings.enabled)
 					.onChange(async (value) => {
 						this.plugin.settings.enabled = value;
-						await this.plugin.saveSettings();
-						this.plugin.refreshFloatToc();
-					}),
-			);
-
-		new Setting(containerEl)
-			.setName('Banner 额外下移')
-			.setDesc(
-				'在 Pixel Banner 自动检测之外，额外增加的顶部留白（像素）。',
-			)
-			.addSlider((slider) =>
-				slider
-					.setLimits(-80, 200, 4)
-					.setValue(this.plugin.settings.bannerOffsetExtra)
-					.setDynamicTooltip()
-					.onChange(async (value) => {
-						this.plugin.settings.bannerOffsetExtra = value;
 						await this.plugin.saveSettings();
 						this.plugin.refreshFloatToc();
 					}),
@@ -104,56 +87,13 @@ export class FloatTocSettingTab extends PluginSettingTab {
 			);
 
 		new Setting(containerEl)
-			.setName('靠顶时的距顶高度')
-			.setDesc('垂直位置为「靠顶部」时，目录距顶部的距离（像素）；有 Banner 时会自动下移。')
-			.addSlider((slider) =>
-				slider
-					.setLimits(24, 240, 4)
-					.setValue(this.plugin.settings.railTopFixed)
-					.setDynamicTooltip()
-					.onChange(async (value) => {
-						this.plugin.settings.railTopFixed = value;
-						await this.plugin.saveSettings();
-						this.plugin.refreshFloatToc();
-					}),
-			);
-
-		new Setting(containerEl)
-			.setName('当前标题判定线')
-			.setDesc('距滚动区域顶部的偏移（像素），用于高亮当前章节。')
-			.addSlider((slider) =>
-				slider
-					.setLimits(40, 200, 4)
-					.setValue(this.plugin.settings.scrollSpyOffset)
-					.setDynamicTooltip()
-					.onChange(async (value) => {
-						this.plugin.settings.scrollSpyOffset = value;
-						await this.plugin.saveSettings();
-						this.plugin.refreshFloatToc();
-					}),
-			);
-
-		new Setting(containerEl)
-			.setName('最低标题级别')
-			.setDesc('目录中包含的最深标题级别（1 = H1）。')
-			.addSlider((slider) =>
-				slider
-					.setLimits(1, 6, 1)
-					.setValue(this.plugin.settings.minHeadingLevel)
-					.setDynamicTooltip()
-					.onChange(async (value) => {
-						this.plugin.settings.minHeadingLevel = value;
-						await this.plugin.saveSettings();
-						this.plugin.refreshFloatToc();
-					}),
-			);
-
-		new Setting(containerEl)
 			.setName('最高标题级别')
-			.setDesc('目录中包含的最浅标题级别（6 = H6）。')
+			.setDesc(
+				`目录中包含的最浅标题级别（最大 ${MAX_HEADING_LEVEL_LIMIT}，对应 H${MAX_HEADING_LEVEL_LIMIT}）。`,
+			)
 			.addSlider((slider) =>
 				slider
-					.setLimits(1, 6, 1)
+					.setLimits(1, MAX_HEADING_LEVEL_LIMIT, 1)
 					.setValue(this.plugin.settings.maxHeadingLevel)
 					.setDynamicTooltip()
 					.onChange(async (value) => {
