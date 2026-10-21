@@ -1,0 +1,9 @@
+{
+	"id": "float-toc",
+	"name": "Float TOC",
+	"version": "0.2.1",
+	"minAppVersion": "1.5.0",
+	"description": "Personal floating table of contents for long notes (work in progress).",
+	"author": "lixiaofeng",
+	"isDesktopOnly": true
+}
