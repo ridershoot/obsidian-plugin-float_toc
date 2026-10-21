@@ -19,7 +19,7 @@ Accepted (2026-10-21)
 3. **纵向位置**：控件 `position: absolute`，相对编辑区滚动容器；`top` 随滚动更新，使指示器贴近当前阅读位置（Notion 使用 inline `top` + `inset-inline-end: 0`）。
 4. **Banner 兼容**：检测 Pixel Banner 渲染后的有效顶部高度（如 `--pixel-banner-height` 及相关布局），为浮动目录预留 `top` / `margin` 偏移；设置页提供手动微调。
 5. **平台**：首版仅桌面（`isDesktopOnly: true`），macOS 自用。
-6. **开发库**：`/Users/lixiaofeng/Blog`，通过符号链接加载本仓库。
+6. **开发库**：本地 Vault（路径因设备而异），通过符号链接加载本仓库。
 
 ## Consequences
 

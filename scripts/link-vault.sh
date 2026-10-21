@@ -2,7 +2,12 @@
 set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "$0")/.." && pwd)"
-VAULT_DIR="${1:-/Users/lixiaofeng/Blog}"
+if [[ $# -lt 1 ]]; then
+	echo "Usage: $0 <vault-path>" >&2
+	echo "Example: $0 /path/to/vault" >&2
+	exit 1
+fi
+VAULT_DIR="$1"
 PLUGIN_ID="float-toc"
 TARGET="${VAULT_DIR}/.obsidian/plugins/${PLUGIN_ID}"
 

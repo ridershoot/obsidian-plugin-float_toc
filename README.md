@@ -43,19 +43,17 @@ npm run lint
 <Vault>/.obsidian/plugins/float-toc/
 ```
 
-本机默认库：`/Users/lixiaofeng/Blog`。一键符号链接：
+一键符号链接（将 `<你的 Vault 路径>` 换成实际库目录）：
 
 ```bash
 chmod +x scripts/link-vault.sh
-./scripts/link-vault.sh
-# 或指定其他库：./scripts/link-vault.sh /path/to/vault
+./scripts/link-vault.sh /path/to/vault
 ```
 
 也可手动链接：
 
 ```bash
-ln -sfn "/Users/lixiaofeng/Playground/obsidian-plugin-float_toc" \
-  "/Users/lixiaofeng/Blog/.obsidian/plugins/float-toc"
+ln -sfn "<本仓库路径>" "<你的 Vault 路径>/.obsidian/plugins/float-toc"
 ```
 
 设计参考见 [docs/design/notion-floating-toc.md](./docs/design/notion-floating-toc.md)；决策记录见 [docs/adr/0001-notion-style-floating-toc.md](./docs/adr/0001-notion-style-floating-toc.md)。
