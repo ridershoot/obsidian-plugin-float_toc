@@ -126,7 +126,9 @@
 	padding: 6px 8px;
 	pointer-events: auto;
 	border-color: var(--background-modifier-border);
-	box-shadow: var(--shadow-s);
+	box-shadow:
+		0 1px 2px color-mix(in srgb, var(--shadow-color, #000) 6%, transparent),
+		0 2px 6px color-mix(in srgb, var(--shadow-color, #000) 5%, transparent);
 }
 
 .float-toc-item {
