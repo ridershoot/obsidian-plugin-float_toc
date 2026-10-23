@@ -9,7 +9,8 @@
 ## Environment & tooling
 
 - Node.js: use current LTS (Node 18+ recommended).
-- **Package manager: npm** (required for this sample - `package.json` defines npm scripts and dependencies).
+- **Package manager: npm** (required for this sample - `package.json` defines npm scripts and dependencies). `npm run assert-no-pnpm` fails if `pnpm-lock.yaml`, `pnpm-workspace.yaml`, or `.pnpm-store/` appear at the repo root.
+
 - **Bundler: esbuild** (required for this sample - `esbuild.config.mjs` and build scripts depend on it). Alternative bundlers like Rollup or webpack are acceptable for other projects if they bundle all external dependencies into `main.js`.
 - Types: `obsidian` type definitions.
 

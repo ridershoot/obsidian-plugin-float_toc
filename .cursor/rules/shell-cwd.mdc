@@ -1,0 +1,16 @@
+---
+description: Run package-manager and install commands only inside this repo root
+alwaysApply: true
+---
+
+# Shell cwd for this repo
+
+This workspace may include sibling roots. Treat **this repository root** as the only place for npm / Node install commands.
+
+For any command that installs packages or writes lockfiles, use one shell line:
+
+```bash
+cd /absolute/path/to/obsidian-plugin-float_toc && pwd && npm <command>
+```
+
+Confirm `pwd` prints this repo before the install runs. Prefer `cd` in the command string over relying on Shell `working_directory` alone.
